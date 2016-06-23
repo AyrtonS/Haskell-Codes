@@ -27,3 +27,13 @@ main = do
          putStrLn ("Chamada invalida do programa "++ progName)
          putStrLn ("Uso: "++progName++" <arquivo-entrada> <arquivo-saida>")
          exitFailure
+
+
+
+--type FilePath = String
+--readFile :: FilePath -> IO String -- LER AQUIVO
+--writeFile :: FilePath -> String -> IO() -- GRAVA NO ARQUIVO
+--appendFile :: FilePath -> String -> IO() -- ADICIONA NO FIM DO ARQUIVO
+--lines :: String -> [String]
+--words :: String -> [String]
+
