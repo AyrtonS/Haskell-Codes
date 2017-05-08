@@ -1,4 +1,4 @@
-module BSTree (BSTree, empty, isEmpty, insert, search, myMax, myMin) where
+module BSTree (BSTree, empty, isEmpty, insert, updateOrInsert, search, remove, myMax, myMin, inOrderWalk) where
 
 import Aula3 (myIf)
 
@@ -22,15 +22,14 @@ rtree :: BSTree k v -> BSTree k v
 rtree Empty = Empty
 rtree (Branch key' val' lt rt) = rt
 
+isEmptySSubtree :: (BSTree k v -> BSTree k v) -> BSTree k v -> Bool
+isEmptySSubtree subtree tree = isEmpty (subtree tree)
+
 isEmptyLTree :: BSTree k v -> Bool
-isEmptyLTree Empty = True
-isEmptyLTree (Branch key val Empty rt) = True
-isEmptyLTree (Branch key val lt rt) = False
+isEmptyLTree = isEmptySSubtree ltree
 
 isEmptyRTree :: BSTree k v -> Bool
-isEmptyRTree Empty = True
-isEmptyRTree (Branch key val lt Empty) = True
-isEmptyRTree (Branch key val lt rt) = False
+isEmptyRTree = isEmptySSubtree rtree
 
 getVal :: BSTree k v -> Maybe v
 getVal Empty = Nothing
@@ -49,6 +48,32 @@ insert tree@(Branch key' val' lt rt) (key, val) = decide (myCmp key key') where
                                           lt' = insert lt (key, val)
                                           rt' = insert rt (key, val)
 
+updateOrInsert :: Ord k => BSTree k v -> (k, v) -> BSTree k v
+updateOrInsert Empty (key, val) = Branch key val empty empty
+updateOrInsert (Branch key' val' lt rt) (key, val) = decide (myCmp key key') where
+                                                     decide L = Branch key' val' lt' rt
+                                                     decide E = Branch key val lt rt
+                                                     decide G = Branch key' val' lt rt'
+                                                     lt' = updateOrInsert lt (key, val)
+                                                     rt' = updateOrInsert rt (key, val)
+
+remove :: Ord k => BSTree k v -> k -> BSTree k v
+remove Empty key' = Empty
+remove tree@(Branch key val lt rt) key' = decide (myCmp key' key) where
+                                     decide L = Branch key val lt' rt
+                                     decide G = Branch key val lt rt'
+                                     decide E = rm tree
+                                     lt' = remove lt key'
+                                     rt' = remove rt key'
+                                     rm (Branch key val Empty Empty) = Empty
+                                     rm (Branch key val lt Empty) = lt
+                                     rm (Branch key val Empty rt) = rt
+                                     rm (Branch key val lt rt) = Branch key'' val'' lt'' rt
+                                     (key'', val'') = mostRight lt
+                                     mostRight (Branch key val lt Empty) = (key, val)
+                                     mostRight (Branch key val lt rt) = mostRight rt
+                                     lt'' = remove lt key''
+
 search :: Ord k => BSTree k v -> k -> Maybe v
 search Empty key = Nothing
 search (Branch key' val' lt rt) key = decide (myCmp key key') where
@@ -57,7 +82,7 @@ search (Branch key' val' lt rt) key = decide (myCmp key key') where
                                       decide G = search rt key
 
 extreme :: (BSTree k v -> Bool) -> (BSTree k v -> BSTree k v) -> BSTree k v -> Maybe v
-extreme isEmpty descend Empty = Nothing
+extreme isEmptySubTree descend Empty = Nothing
 extreme isEmptySubTree descend tree = myIf
                                       (isEmptySubTree tree)
                                       (getVal tree)
@@ -69,27 +94,6 @@ myMax = extreme isEmptyRTree rtree
 myMin :: BSTree k v -> Maybe v
 myMin = extreme isEmptyLTree ltree
 
-
-preOrderWalk :: BSTree k v -> [v]
-preOrderWalk = undefined
-
-inOrderWalk :: BSTree k v -> [v]
+inOrderWalk :: BSTree k v -> [(k, v)]
 inOrderWalk Empty = []
-inOrderWalk tree@(Branch key' val' lt rt) =inOrderWalk lt ++ [val'] ++ inOrderWalk rt
-
-postOrderWalk :: BSTree k v -> [v]
-postOrderWalk (Branch key' val' lt rt) = postOrderWalk lt ++ postOrderWalk rt ++ [val'] 
-
--- Escreva folds para arvores, tambem no arquivo BSTree.hs, e as exporte
-
-foldlTree :: (a -> b -> a) -> a -> BSTree k b -> a
-foldlTree = undefined
-
-foldrTree :: (a -> b -> b) -> b -> BSTree k a -> b
-foldrTree = undefined
-
--- Escreva a funcao abaixo, que atualiza o elemento associado a uma chave.
--- Escreva no arquivo BSTree.hs e a exporte.
-
-update :: (Ord k) => BSTree k v -> (k, v) -> BSTree k v
-update = undefined
+inOrderWalk (Branch key val lt rt) = inOrderWalk lt ++ (key, val) : inOrderWalk rt
