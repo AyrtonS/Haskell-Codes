@@ -19,11 +19,11 @@ mySum' = L.foldl' (+) 0
 --foldl' (f) e [x:xs]
 -- Agora, veja a seguinte funcao:
 
-disjoin :: [a] -> ([a], [a],[a],[a])
-disjoin []         = ([], [],[],[])
-disjoin [x]        = ([x], [],[],[])
-disjoin (x1:x2:x3:x4:xs) = (x1:ps, x2:qs,x3:ws,x4:vs) where
-                     	   (ps, qs, ws, vs) = disjoin xs
+disjoin :: [a] -> ([a], [a])
+disjoin []         = ([], [])
+disjoin [x]        = ([x], [])
+disjoin (x1:x2:xs) = (x1:ps, x2:qs) where
+                     	   (ps, qs) = disjoin xs
 
 -- Seria possível utilizar a funcao disjoin para, usando rpar, rseq e runEval,
 -- criar uma funcao mySum2 que computa a soma de uma lista em paralelo, usando
