@@ -11,7 +11,7 @@ main :: IO ()
 main = program
 
 program :: IO ()
-program = print $ interSec2 [1,3,5,2,6,2,8,9,13,11,87,35,9,3] [1,5,2,6,90,321,5,6,78]
+program = print $ interSec2 [2..5000] [1..10000]
 
 
 -- Função recebe duas listas completas, e usa disjoin para dividir a lista em duas, para que possa
@@ -25,9 +25,9 @@ interSec [] [] = []
 interSec xs [] = xs
 interSec [] ys = ys
 interSec xs ys = runEval $ do let (ps,qs) = disjoin ys
-                              x <- rpar $ compare' xs ps
-                              y <- rpar $ compare' xs qs
-                              let monta = x ++ y--sort (x `union` y)
+                              x <- rpar $ force compare' xs ps
+                              y <- rpar $ force compare' xs qs
+                              let monta = x `union` y
                               return monta
 
 -- DUAL CORE
@@ -47,10 +47,17 @@ interSec2 [] ys = ys
 interSec2 xs ys = runEval $ do let (ps,qs,vs,ws) = disjoin' ys
                                x <- rpar $ compare' xs ps
                                y <- rpar $ compare' xs qs
-			       v <- rpar $ compare' xs vs
-			       w <- rpar $ compare' xs ws
-                               let monta = x ++ y ++ v ++ w --sort (x `union` y)
+                               v <- rpar $ compare' xs vs
+                               w <- rpar $ compare' xs ws
+                               let monta = ((x `union` y) `union` v) `union` w
                                return monta
+
+
+--parmap :: (a->b) -> [a] -> [a]-> Eval [b]
+--parmap f [] [] = return []
+--parmap f (x:xs)(y:ys) = do x' <- rpar $ f x y
+--                           xs' <- parmap f xs' ys'
+ --                          return (x':xs')
 
 -- CORE i5, i7
 disjoin' :: [a] -> ([a], [a],[a],[a])
@@ -68,3 +75,5 @@ compare' [] [] = []
 compare' xs [] = []
 compare' [] ys = []
 compare' xs ys = xs `intersect` ys
+
+
