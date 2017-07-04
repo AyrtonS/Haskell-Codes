@@ -11,7 +11,7 @@ main :: IO ()
 main = program
 
 program :: IO ()
-program = print $ interSec2 [2..5000] [1..10000]
+program = print $ interSec2 [20000..50000] [30000..100000]
 
 
 -- Função recebe duas listas completas, e usa disjoin para dividir a lista em duas, para que possa
