@@ -30,6 +30,7 @@ myRepeat x = x : myRepeat x
 -- Escreva uma função que, dada uma lista xs, cria uma lista infinita repetindo os elementos de xs
 
 myCycle :: [a] -> [a]
+myCycle [] = []
 myCycle l@(x:xs) = l `myCc` myCycle l
 
 -- Escreva uma função que recebe um elemento x e uma lista ys, 
